@@ -150,6 +150,6 @@ def to_mp4(ws, timesteps = None, fps = 4, overlay = 'all',
                         plt.text(0.975,0.05, timestring, transform = plt.gca().transAxes, va='center', ha = 'right', color = 'yellow')])
 
         ani = animation.ArtistAnimation(fig, frames, interval = int(1000 / fps), blit=True,repeat_delay=1000)
-        ani.save(path)
+        ani.save(path, writer = "PillowWriter")
 
 

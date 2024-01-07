@@ -76,7 +76,7 @@ def _hist_match(original, specified):
 
     return b[bin_idx].reshape(oldshape)
 
-def equalize_histogram(img, channels = [4]):
+def equalize_histogram(img, channels = [0]):
     # Equalize histograms
     for channel in channels:
         for timestep in range(1, img.shape[0]):
@@ -88,7 +88,7 @@ def equalize_histogram(img, channels = [4]):
     return img
 
 
-def autoscale_histogram(img, channels = [0,1,2,3]):
+def autoscale_histogram(img, channels = [0,1,2,3,4]):
 
     minmax = lambda x : (x - x.min()) / (x.max() - x.min())
 
@@ -115,7 +115,7 @@ def apply_deskew_transform(img, s, M):
 def deskew_image(img):
 
     # Get a median frame off the briightfield channel
-    frame = np.median(img[0:1,4,:,:], axis = 0).astype(np.uint8)
+    frame = np.median(img[0:1,0,:,:], axis = 0).astype(np.uint8)
 
     height, width = frame.shape
 
@@ -163,7 +163,7 @@ def find_homography(f0, f1):
 
     # Detect feature points in previous frame
     prev_pts = cv2.goodFeaturesToTrack(f0, maxCorners=5000, qualityLevel=0.1, minDistance=5, blockSize=3)
-
+    
     # Calculate optical flow (i.e. track feature points)
     curr_pts, status, err = cv2.calcOpticalFlowPyrLK(f0, f1, prev_pts, None)
 
@@ -187,11 +187,12 @@ def stabilize_image(img):
     for timepoint in tqdm(range(1, img.shape[0]), leave = False):
 
         # Find a transformation that will match the two brightfield frames 0 and 1
-        f0 = img[timepoint - 1, 4,:,:]
-        f1 = img[timepoint, 4,:,:]
+        # Find a transformation that will match the intersection of the non-brightfield frames
+        f0 = img[timepoint - 1, 1:,:,:].sum(0).astype(np.uint8)
+        f1 = img[timepoint, 1:,:,:].sum(0).astype(np.uint8)
         M = find_homography(f0, f1)
 
-        # Apply transformation to each channel
+        # Apply transformation to each channel individually
         for channel in range(img.shape[1]):
             img[timepoint, channel, :, :] = apply_transform(img[timepoint, channel, :, :], M) 
     
@@ -220,12 +221,11 @@ def recipe_default(ws : WellSequence):
     X = trim_equal(X)
     X = to_8bit(X)
     X = equalize_histogram(X)
-    X = deskew_image(X)
+    #X = deskew_image(X)
     X = trim_equal(X)
-    X = stabilize_image(X)
-    X = auto_scale_channels(X)
+    #X = stabilize_image(X)
+    #X = auto_scale_channels(X)
 
     ws.set_X(X)
 
     return ws
-

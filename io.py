@@ -1,4 +1,4 @@
-import czifile
+#import czifile
 import numpy as np
 import viztools as vz
 import re
