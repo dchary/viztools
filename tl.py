@@ -25,7 +25,7 @@ def _get_bounding_rects(contours, img, min_size = 200, max_size = 25000):
     
     return [cv2.boundingRect(c) for c in contours]
 
-def find_nanowells(ws : WellSequence, threshold = 30):
+def _find_nanowells(ws : WellSequence, threshold = 30):
 
     img = ws.get_channel_timestep('Brightfield', timesteps = 0)
 
@@ -35,6 +35,30 @@ def find_nanowells(ws : WellSequence, threshold = 30):
     boundingRects = cv2.groupRectangles(boundingRects, 1)[0]
 
     ws.uns['nanowells'] = boundingRects
+
+def find_nanowells(ws : WellSequence, threshold = 30, do_sweep = False):
+    if not do_sweep: 
+        return _find_nanowells(ws, threshold)
+    else:
+        best_threshold = 0
+        max_rects = 0
+        for threshold in range(5,80,5):
+            img = ws.get_channel_timestep('Brightfield', timesteps = 0)
+
+            _, img = cv2.threshold(img, threshold, 255, cv2.THRESH_BINARY_INV)
+            contours, hierarchy = cv2.findContours(img,cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE,)
+            boundingRects = _get_bounding_rects(contours, img)
+            boundingRects = cv2.groupRectangles(boundingRects, 1)[0]
+
+            n_rects = len(boundingRects)
+            if n_rects > max_rects:
+                best_threshold = threshold
+                max_rects = n_rects
+
+        
+        print(f"Best threshold is: {best_threshold}")
+        return _find_nanowells(ws, best_threshold)
+
 
 
 def correlate_signals(ws : WellSequence):
