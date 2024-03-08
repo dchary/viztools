@@ -213,6 +213,24 @@ def _auto_scale(img, smin = 3, smax = 10):
 
     return cv2.threshold(img, min_val, max_val, cv2.THRESH_TOZERO)[1]
 
+def _auto_scale_otsu(img, thresh):
+
+    # Apply manual thresholding
+    _, thresh_image = cv2.threshold(img, thresh, 255, cv2.THRESH_BINARY)
+
+    # Define a kernel for morphological operations
+    kernel = np.ones((3,3), np.uint8)
+
+    # Apply opening to remove noise
+    cleaned_image = cv2.morphologyEx(thresh_image, cv2.MORPH_OPEN, kernel)
+
+    return cleaned_image
+
+def auto_scale_otsu(img, thresh):
+    for channel in range(img.shape[1] - 1):
+        for timestep in range(1, img.shape[0]):
+            img[timestep,channel,:,:] = _auto_scale_otsu(img[timestep,channel,:,:], thresh = thresh)
+    return img
 
 def recipe_default(ws : WellSequence):
 
@@ -221,10 +239,10 @@ def recipe_default(ws : WellSequence):
     X = trim_equal(X)
     X = to_8bit(X)
     X = equalize_histogram(X)
-    #X = deskew_image(X)
+    X = deskew_image(X)
     X = trim_equal(X)
-    #X = stabilize_image(X)
-    #X = auto_scale_channels(X)
+    X = stabilize_image(X)
+    X = auto_scale_otsu(X, 45)
 
     ws.set_X(X)
 
