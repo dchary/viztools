@@ -126,7 +126,7 @@ def deskew_image(img):
     frame = cv2.threshold(frame, 20, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
 
     # Detect edges
-    lines = cv2.HoughLinesP(frame, 1, np.pi / 180, 200, minLineLength=width / 12, maxLineGap=width / 150)
+    lines = cv2.HoughLinesP(frame, 1, np.pi / 180, 100, minLineLength=50, maxLineGap=10)
 
     # Collect the angles of these lines (in radians)
     angles = []
@@ -227,8 +227,8 @@ def _auto_scale_otsu(img, thresh):
     return cleaned_image
 
 def auto_scale_otsu(img, thresh):
-    for channel in range(img.shape[1] - 1):
-        for timestep in range(1, img.shape[0]):
+    for channel in range(1, img.shape[1]):
+        for timestep in range(0, img.shape[0]):
             img[timestep,channel,:,:] = _auto_scale_otsu(img[timestep,channel,:,:], thresh = thresh)
     return img
 
