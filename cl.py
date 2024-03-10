@@ -22,9 +22,9 @@ def get_colormap(cvals, colors, alphas = None, max_alpha = 0.33):
     return cmap
 
 def get_default_colormap(basecolor, cvals = [0,60, 175,255], max_alpha = 0.5):
-    return get_colormap(cvals = cvals, colors = ['black', 'black', basecolor,'white'], max_alpha = max_alpha)
+    return get_colormap(cvals = cvals, colors = ['black', 'black', basecolor, basecolor], max_alpha = max_alpha)
 
-CM_BYSTANDER = get_default_colormap('blue', cvals = [0, 60, 100, 255], max_alpha = 0.3)
+CM_BYSTANDER = get_default_colormap('blue', cvals = [0, 50, 100, 255], max_alpha = 0.3)
 CM_ONTARGET = get_default_colormap('lime', cvals = [0,50,100,255], max_alpha = 0.5)
 CM_TCELL = get_default_colormap('cyan', cvals = [0,10,50,255], max_alpha = 0.6)
 CM_DEATH = get_default_colormap('crimson', cvals = [0,8,50,255], max_alpha = 0.6)
