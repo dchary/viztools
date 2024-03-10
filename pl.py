@@ -40,8 +40,6 @@ def _get_nanowell_overlay(nanowells, shape):
 
 
 
-
-
 def plot_frame(ws : WellSequence, ts = 0, channel = 'Brightfield',
                  dpi = 100, figsize = (4,4), title = None, overlay = 'all',
                  crop_coord = None, show_time = True, ax = None, animated = False,
@@ -65,26 +63,26 @@ def plot_frame(ws : WellSequence, ts = 0, channel = 'Brightfield',
         axes.set_animated(animated)
         axes.imshow(ws.get_channel_timestep(channel, timesteps = ts), cmap = vz.cl.CM_DARKGRAY, interpolation = interpolation)
         if overlay == 'all':
-            overlay = ['ontarget','bystander','t cell','death','nanowells']
+            overlay = ['Ontarget','Bystander','T Cell','Death','nanowells']
 
         patches = []
         for o in overlay:
-            if o == 'death':
-                overlay_death = ws.get_channel_timestep(2, timesteps = ts)
+            if o == 'Death':
+                overlay_death = ws.get_channel_timestep(o, timesteps = ts)
                 axes.imshow(overlay_death,cmap = vz.cl.CM_DEATH, vmin = 0, vmax = 255, interpolation = interpolation)
                 patches.append(mpatches.Patch(color='red', label='Cell Death'))
-            elif o == 'bystander':
-                overlay_bystander = ws.get_channel_timestep(0, timesteps = ts)
+            elif o == 'Bystander':
+                overlay_bystander = ws.get_channel_timestep(o, timesteps = ts)
                 axes.imshow(overlay_bystander,cmap = vz.cl.CM_BYSTANDER, vmin = 0, vmax = 255, interpolation = interpolation)
                 patches.append(mpatches.Patch(color='blue', label='Bystanders (CD19-)'))
 
-            elif o == 'ontarget':
-                overlay_ontarget = ws.get_channel_timestep(1, timesteps = ts)
+            elif o == 'Ontarget':
+                overlay_ontarget = ws.get_channel_timestep(o, timesteps = ts)
                 axes.imshow(overlay_ontarget,cmap = vz.cl.CM_ONTARGET, vmin = 0, vmax = 255, interpolation = interpolation)
                 patches.append(mpatches.Patch(color='lime', label='Ontargets (CD19+)'))
 
-            elif o == 't cell':
-                overlay_tcell = ws.get_channel_timestep(3, timesteps = ts)
+            elif o == 'T Cell':
+                overlay_tcell = ws.get_channel_timestep(o, timesteps = ts)
                 axes.imshow(overlay_tcell,cmap = vz.cl.CM_TCELL, vmin = 0, vmax = 255, interpolation = interpolation)
                 patches.append(mpatches.Patch(color='cyan', label='T Cells (CD8+)'))
 
@@ -113,9 +111,6 @@ def plot_frame(ws : WellSequence, ts = 0, channel = 'Brightfield',
     return axes
 
 
-
-
-
 def to_mp4(ws, timesteps = None, fps = 4, overlay = 'all', 
     path = '/content/movie.mp4', dpi = 100, figsize = (2,2), interpolation = 'hanning'):
     frames = [] # for storing the generated images
@@ -125,7 +120,7 @@ def to_mp4(ws, timesteps = None, fps = 4, overlay = 'all',
 
         if not timesteps: timesteps = (0, ws.timesteps)
 
-        if overlay == 'all': overlay = ['bystander','ontarget','tcell','death']
+        if overlay == 'all': overlay = ['Ontarget','Bystander','T Cell','Death']
         alphas = [0.0, 0.0, 0.0, 0.0]
         for o in overlay:
             if o == 'bystander': alphas[0] = 1.0
